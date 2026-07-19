@@ -5,50 +5,147 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kindle Dashboard</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: white;
-            color: black;
-            text-align: center;
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding: 20px;
+            padding: 0;
         }
-        h1 { margin-bottom: 10px; }
-        .weather {
-            font-size: 2rem; 
-            font-weight: bold;
-            margin-bottom: 20px;
+        
+        /* Fixed base to lock screen viewports */
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #ffffff;
+            font-family: Amazon Ember, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
+
+        /* 
+           Rotates the entire interface 90deg clockwise.
+           Optimized for layout position when charging port is on the left side.
+        */
+        .rotation-wrapper {
+            width: 100vh;
+            height: 100vw;
+            transform: rotate(90deg);
+            transform-origin: top left;
+            position: absolute;
+            top: 0;
+            left: 100vw;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Minimal outer boundary optimized for Kindle E-ink */
         .container {
-            max-width: 600px;
-            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            border: 2px solid #000000;
         }
-        img {
-            max-width: 100%;
-            height: auto;
-            border: 2px solid black;
+
+        /* Top Half setup */
+        .top-half {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 45% 55%;
+            align-content: center;
+            align-items: center;
+            padding: 0 40px;
+            background-color: #ffffff;
+            border-bottom: 2px solid #000000;
+        }
+
+        .clock-section {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        /* Scaled cleanly for Kindle screen resolution */
+        .time {
+            font-size: 5rem;
+            font-weight: bold;
+            color: #000000;
+            line-height: 1;
+        }
+
+        .date {
+            font-size: 1.2rem;
+            color: #000000;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        /* Text area sized to match visual presence of the clock */
+        .quote-section {
+            padding-left: 20px;
+            text-align: right;
+        }
+
+        .static-quote {
+            font-size: 1.5rem;
+            color: #000000;
+            font-weight: bold;
+            line-height: 1.3;
+            letter-spacing: -0.01em;
+        }
+
+        /* Bottom Half layout */
+        .bottom-half {
+            flex: 1;
+            overflow: hidden;
+            background-color: #ffffff;
+        }
+
+        /* Pure high contrast filling */
+        .bottom-half img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>My Dashboard</h1>
-        <div class="weather" id="weather-text">Loading Weather...</div>
-        
-        <!-- Replace the URL below with your own photo's URL -->
-        <img src="https://unsplash.com" alt="Daily Photo" id="daily-photo">
+    <div class="rotation-wrapper">
+        <div class="container">
+            <!-- Top Half -->
+            <div class="top-half">
+                <div class="clock-section">
+                    <div class="time" id="current-time">00:00</div>
+                    <div class="date" id="current-date">Loading...</div>
+                </div>
+                
+                <div class="quote-section">
+                    <div class="static-quote">Focus on the work more than on temporary things which feels good only right now.</div>
+                </div>
+            </div>
+
+            <!-- Bottom Half -->
+            <div class="bottom-half">
+                <!-- Direct public fallback image placeholder swap points -->
+                <img src="https://picsum.photos/1024/768?grayscale" alt="Dashboard Media Display Asset">
+            </div>
+        </div>
     </div>
 
     <script>
-        // Weather Simulation (Replace with actual API code)
-        document.getElementById("weather-text").innerText = "24°C, Sunny";
+        function updateClock() {
+            const now = new Date();
+            
+            // Clean format config drops seconds completely
+            const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: true };
+            document.getElementById('current-time').textContent = now.toLocaleTimeString([], timeOptions);
+            
+            const dateOptions = { weekday: 'short', month: 'short', day: 'numeric' };
+            document.getElementById('current-date').textContent = now.toLocaleDateString([], dateOptions);
+        }
 
-        // Optional: Auto-refresh the photo every 6 hours
-        setInterval(function() {
-            var photo = document.getElementById("daily-photo");
-            photo.src = "https://unsplash.com?t=" + new Date().getTime();
-        }, 21600000);
+        updateClock();
+        setInterval(updateClock, 30000); // 30-second checking scale to maintain Kindle battery runtime
     </script>
 </body>
 </html>
